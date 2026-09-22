@@ -33,8 +33,6 @@ open index.html            # macOS  (or double-click the file)
 npm run serve
 ```
 
-To host it for the team, push the repo to GitHub and turn on **Settings → Pages → Deploy from branch → main / (root)**.
-
 ## The plain-language box only works inside Claude
 
 Step 1 uses the `sample` capability of a published Claude artifact (it asks Claude, using the viewer's own Claude account). Outside claude.ai there is no such thing, so on GitHub Pages or a local file the box is disabled with a short message, and **everything else still works**: the form, checks, preview and copy.
