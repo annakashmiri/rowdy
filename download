@@ -1,0 +1,6 @@
+# Never commit the real sheet: it has internal campaign data and links
+*.xlsx
+*.xlsm
+*.csv
+node_modules/
+.DS_Store

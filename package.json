@@ -1,0 +1,10 @@
+{
+  "name": "rowdy",
+  "version": "1.0.0",
+  "description": "Enter a paid-media deal once, get every row: paste-ready rows for each tab of the ads briefing sheet.",
+  "private": true,
+  "scripts": {
+    "test": "node tests/core.test.js",
+    "serve": "npx --yes serve ."
+  }
+}
