@@ -85,6 +85,7 @@ h1{font-size:2rem;line-height:1.15;margin:0 0 8px;letter-spacing:-.02em;font-wei
 .linklike{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--blue-ink);text-decoration:underline;cursor:pointer}
 .ai textarea{width:100%;min-height:120px;resize:vertical}
 .ai-actions{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;margin-top:12px}
+#toneWrap select{width:auto;padding:4px 8px}
 .status{margin:10px 0 0;color:var(--muted);min-height:1.4em}
 .status.err{color:var(--red)}
 .notice{margin-top:12px;border-left:3px solid var(--amber);background:var(--amber-tint);padding:10px 14px;border-radius:0 8px 8px 0}
@@ -220,6 +221,14 @@ td.over small{color:var(--red);font-weight:700}
         <button type="button" class="btn primary" id="aiGo">Fill in the form</button>
         <button type="button" class="btn" id="aiStop" hidden>Stop</button>
         <label class="check"><input type="checkbox" id="draft" checked> Write headline &amp; ad copy for me, in Domino's style</label>
+        <label class="check" id="toneWrap">Tone
+          <select id="tone">
+            <option value="warm">Warm &amp; casual (default)</option>
+            <option value="humor">A bit humorous</option>
+            <option value="catchy">Catchy &amp; punchy</option>
+            <option value="formal">Formal &amp; straightforward</option>
+          </select>
+        </label>
       </div>
       <p class="status" id="aiStatus" role="status" aria-live="polite"></p>
       <div class="notice" id="aiNotice" hidden></div>
@@ -773,12 +782,18 @@ function todayInfo(){
   const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   return {iso, weekday:d.toLocaleDateString('en-GB',{weekday:'long'})};
 }
-function buildPrompt(note, draft){
+function buildPrompt(note, draft, tone){
   const t=todayInfo();
+  const TONE_VOICE = {
+    warm: 'Warm, casual and a little playful, never pushy.',
+    humor: 'A bit humorous and cheeky — a light, fun turn of phrase or a wink at everyday life. Keep it fun, not silly or over the top, and still easy to read fast.',
+    catchy: 'Punchy and memorable, like a tagline — short, rhythmic, quotable. Favour a strong phrase over a full sentence.',
+    formal: 'Straightforward and clean — a clear, professional statement of the offer and its value, minimal flourish, no slang, no emoji at all on any platform.'
+  };
   const voice = [
-    'Domino\'s Pizza Malaysia\'s social voice: warm, casual and a little playful, never pushy.',
+    'Domino\'s Pizza Malaysia\'s social voice. ' + (TONE_VOICE[tone] || TONE_VOICE.warm),
     'A post usually opens with a short, relatable everyday hook (often a light question about the day or a craving), then states the deal plainly (what you get and the price), mentions delivery/pick-up if relevant, gives the promo code if one was given, and closes with a light, friendly nudge to order.',
-    'Sparing emoji is fine in longer copy (never in TikTok text, which must have none at all).',
+    tone==='formal' ? 'No emoji at all, on any platform.' : 'Sparing emoji is fine in longer copy (never in TikTok text, which must have none at all).',
     'Every platform here is far shorter than a full social caption, so compress to just the hook plus the core offer — do not try to fit a whole caption into a 25-character Meta headline.'
   ].join(' ');
   const copyRule = draft
@@ -822,18 +837,19 @@ function errorCopy(code){
     default: return 'Could not read that one. Try again, or fill the form by hand.';
   }
 }
+$('#draft').addEventListener('change',()=>{ $('#toneWrap').hidden=!$('#draft').checked; });
 aiGo.addEventListener('click',async()=>{
   const note=$('#brief').value.trim();
   if(!note){ setStatus('Write a few lines about the deal first.',true); return; }
   setStatus('Checking that this is available…');
   const sample=await getSample();
   if(!sample){ setStatus(errorCopy('not_declared'),true); return; }
-  const draft=$('#draft').checked;
+  const draft=$('#draft').checked, tone=$('#tone').value;
   ctl=new AbortController();
   aiGo.disabled=true; aiStop.hidden=false; aiNotice.hidden=true;
   setStatus('Reading your description. This can take up to a minute.');
   try{
-    const data=await sample.json(buildPrompt(note,draft),{signal:ctl.signal,cache:false});
+    const data=await sample.json(buildPrompt(note,draft,tone),{signal:ctl.signal,cache:false});
     const unclear=applyParsed(state,data);
     renderAll();
     setStatus('Done. Check everything in step 2 before you copy.');
