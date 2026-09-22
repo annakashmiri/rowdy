@@ -75,6 +75,14 @@ h1{font-size:2rem;line-height:1.15;margin:0 0 8px;letter-spacing:-.02em;font-wei
 .btn:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
 
 /* step 1 */
+.modepick{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px}
+.modebtn{flex:1 1 220px;text-align:left;font:inherit;cursor:pointer;border-radius:10px;border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink);padding:14px 16px}
+.modebtn strong{display:block;font-size:.98rem;margin-bottom:3px}
+.modebtn span{display:block;color:var(--muted);font-size:.85rem;font-weight:400}
+.modebtn[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-tint)}
+.modebtn[aria-pressed="true"] strong{color:var(--blue-ink)}
+.manual-note p{margin:0;color:var(--muted)}
+.linklike{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--blue-ink);text-decoration:underline;cursor:pointer}
 .ai textarea{width:100%;min-height:120px;resize:vertical}
 .ai-actions{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;margin-top:12px}
 .status{margin:10px 0 0;color:var(--muted);min-height:1.4em}
@@ -123,6 +131,36 @@ textarea{resize:vertical;line-height:1.45}
 .emptynote{margin:16px;color:var(--muted)}
 .addad{margin-top:14px}
 
+/* ad-format previews: rough look of each platform's ad unit */
+.prevwrap{margin-top:16px}
+.prevlabel{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 6px;font-weight:700}
+.prev-meta{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--surface)}
+.prev-meta .sponsored{margin:0 0 6px;font-size:.72rem;color:var(--muted)}
+.prev-meta .body{margin:0 0 8px;font-size:.85rem;color:var(--ink);word-break:break-word}
+.prev-meta .img{background:var(--bg);border:1px dashed var(--line-strong);border-radius:6px;height:80px;margin:0 0 8px}
+.prev-meta .metafoot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:8px}
+.prev-meta .hl{margin:0 0 2px;font-weight:700;font-size:.9rem;word-break:break-word}
+.prev-meta .desc{margin:0;color:var(--muted);font-size:.78rem;word-break:break-word}
+.prev-meta .cta{flex:none;background:var(--blue-tint);color:var(--blue-ink);border-radius:6px;padding:6px 12px;font-weight:700;font-size:.8rem;white-space:nowrap}
+.prev-tiktok{position:relative;min-height:130px;display:flex;align-items:flex-end;border-radius:14px;padding:16px;background:#101014;color:#fff}
+.prev-tiktok .tag{position:absolute;top:10px;left:14px;font-size:.68rem;color:#d0d0d6;letter-spacing:.03em}
+.prev-tiktok .cap{font-size:.85rem;line-height:1.4;word-break:break-word}
+.prev-tiktok .ctatag{display:inline-block;margin-top:8px;background:rgba(255,255,255,.16);padding:4px 12px;border-radius:16px;font-size:.75rem;font-weight:600}
+.prev-youtube{display:flex;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--surface)}
+.prev-youtube .thumb{flex:none;width:96px;height:56px;border-radius:6px;background:var(--line);display:grid;place-items:center;color:var(--muted);font-size:1.1rem}
+.prev-youtube .txt{min-width:0}
+.prev-youtube .adtag{font-size:.68rem;color:var(--muted);border:1px solid var(--line-strong);border-radius:3px;padding:0 4px;margin-right:6px}
+.prev-youtube .urlmini{font-size:.72rem;color:var(--muted)}
+.prev-youtube .hl{font-weight:700;margin:3px 0 1px;font-size:.9rem;word-break:break-word}
+.prev-youtube .lh{color:var(--muted);font-size:.82rem;margin:0 0 2px;word-break:break-word}
+.prev-youtube .desc{color:var(--muted);font-size:.8rem;margin:0;word-break:break-word}
+.prev-search{border:1px solid var(--line-strong);border-radius:8px;padding:12px;background:#fff;color:#202124}
+.prev-search .adrow{display:flex;align-items:center;gap:6px;font-size:.75rem;margin:0 0 4px}
+.prev-search .adtag{color:#1a7a3c;border:1px solid #1a7a3c;border-radius:3px;padding:0 4px;font-weight:700;font-size:.68rem}
+.prev-search .url{color:#4d5156}
+.prev-search .hl{margin:0 0 2px;color:#1558d6;font-size:.98rem;word-break:break-word}
+.prev-search .desc{margin:0;color:#4d5156;font-size:.85rem;word-break:break-word}
+
 /* output */
 .legend{display:flex;flex-wrap:wrap;gap:6px 22px;margin:0 0 4px 38px;color:var(--muted);font-size:.86rem}
 @media (max-width:640px){ .legend{margin-left:0} }
@@ -165,18 +203,29 @@ td.over small{color:var(--red);font-weight:700}
   <p class="lede">Enter a deal once, get every row. Rowdy makes the rows for each tab of the paid digital ads sheet. Nothing is written to the sheet until you paste it yourself.</p>
 
   <section class="step" id="step1">
-    <h2><span class="num">1</span> Describe the deal</h2>
-    <p class="sub">Type or paste what you know, in your own words. Claude reads it and fills in step 2. You check everything before anything is copied. Skip this if you would rather fill the form by hand.</p>
+    <h2><span class="num">1</span> Start the deal</h2>
+    <p class="sub">Choose how you'd like to enter it. Either way, you check everything in step 2 before anything is copied.</p>
+    <div class="modepick" role="group" aria-label="How to start">
+      <button type="button" class="modebtn" id="modeDescribe" aria-pressed="true">
+        <strong>Describe it</strong><span>Write a sentence or two. Claude fills the form, including a headline and ad copy in Domino's style if you want.</span>
+      </button>
+      <button type="button" class="modebtn" id="modeManual" aria-pressed="false">
+        <strong>Fill it in myself</strong><span>Skip straight to the form in step 2 and type in every field by hand.</span>
+      </button>
+    </div>
     <div class="panel ai" id="aiPanel">
       <label for="brief" class="sr">Describe the deal</label>
       <textarea id="brief" rows="5" placeholder="For example: Boost Week, 2 pizzas for RM22 with free delivery, code 089794, runs 17 to 27 Sept on Meta, TikTok and YouTube. Ads: a static and Video - Stay At Home."></textarea>
       <div class="ai-actions">
         <button type="button" class="btn primary" id="aiGo">Fill in the form</button>
         <button type="button" class="btn" id="aiStop" hidden>Stop</button>
-        <label class="check"><input type="checkbox" id="draft"> Write any missing ad copy for me</label>
+        <label class="check"><input type="checkbox" id="draft" checked> Write headline &amp; ad copy for me, in Domino's style</label>
       </div>
       <p class="status" id="aiStatus" role="status" aria-live="polite"></p>
       <div class="notice" id="aiNotice" hidden></div>
+    </div>
+    <div class="panel manual-note" id="manualNote" hidden>
+      <p>No problem — <button type="button" class="btn linklike" id="goForm">jump to the form</button> and fill everything in yourself. Nothing here is required.</p>
     </div>
   </section>
 
@@ -408,7 +457,7 @@ const state = {
 /* ===================== UI HELPERS ===================== */
 const $ = (s,r)=> (r||document).querySelector(s);
 let uid=0, rafId=0;
-function scheduleOutput(){ if(rafId) return; rafId=requestAnimationFrame(()=>{ rafId=0; updateOutput(); }); }
+function scheduleOutput(){ if(rafId) return; rafId=requestAnimationFrame(()=>{ rafId=0; updateOutput(); paintAllPreviews(); }); }
 
 function mkField(o){
   const wrap=document.createElement('div');
@@ -446,6 +495,43 @@ function mkField(o){
   inp.addEventListener('input',()=>{ if(o.onInput) o.onInput(inp.value); upd(); scheduleOutput(); });
   if(o.ref) o.ref(inp);
   return wrap;
+}
+
+/* ===================== Ad-format previews ===================== */
+function escapeHtml(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function paintMeta(el,ad,deal){
+  const h=clean(ad.meta.headline)||'Headline', b=clean(ad.meta.primary)||'Primary text goes here', d=clean(ad.meta.desc), cta=clean(deal.cta)||'Order Now';
+  el.innerHTML='<p class="prevlabel">How this roughly looks on Meta</p><div class="prev-meta">'+
+    '<p class="sponsored">Sponsored</p><p class="body">'+escapeHtml(b)+'</p><div class="img"></div>'+
+    '<div class="metafoot"><div><p class="hl">'+escapeHtml(h)+'</p>'+(d?'<p class="desc">'+escapeHtml(d)+'</p>':'')+'</div>'+
+    '<span class="cta">'+escapeHtml(cta)+'</span></div></div>';
+}
+function paintTiktok(el,ad,deal){
+  const c=clean(ad.tiktok.primary)||'Caption goes here', cta=clean(deal.cta)||'Order Now';
+  el.innerHTML='<p class="prevlabel">How this roughly looks on TikTok</p><div class="prev-tiktok"><span class="tag">Sponsored</span>'+
+    '<div class="cap">'+escapeHtml(c)+'<br><span class="ctatag">'+escapeHtml(cta)+' ›</span></div></div>';
+}
+function paintYoutube(el,ad,deal){
+  const h=clean(ad.youtube.headline)||'Headline', lh=clean(ad.youtube.long), d=clean(ad.youtube.desc);
+  el.innerHTML='<p class="prevlabel">How this roughly looks on YouTube</p><div class="prev-youtube"><div class="thumb">▶</div>'+
+    '<div class="txt"><span class="adtag">Ad</span><span class="urlmini">order.dominos.com.my</span>'+
+    '<p class="hl">'+escapeHtml(h)+'</p>'+(lh?'<p class="lh">'+escapeHtml(lh)+'</p>':'')+(d?'<p class="desc">'+escapeHtml(d)+'</p>':'')+'</div></div>';
+}
+function paintSearch(el,ad,deal){
+  const heads=splitLines(ad.search.headlines), descs=splitLines(ad.search.descs);
+  const h=(heads.slice(0,3).join(' | '))||'Headline 1 | Headline 2 | Headline 3';
+  const d=descs[0]||'Description goes here.';
+  const url=landingFor(deal).replace(/^https?:\/\//,'')||'order.dominos.com.my';
+  el.innerHTML='<p class="prevlabel">How this roughly looks on Google Search</p><div class="prev-search">'+
+    '<div class="adrow"><span class="adtag">Ad</span><span class="url">'+escapeHtml(url)+'</span></div>'+
+    '<p class="hl">'+escapeHtml(h)+'</p><p class="desc">'+escapeHtml(d)+'</p></div>';
+}
+const PAINTERS={meta:paintMeta,tiktok:paintTiktok,youtube:paintYoutube,search:paintSearch};
+function paintAllPreviews(){
+  state.ads.forEach(ad=>{
+    if(!ad._previewEls) return;
+    Object.keys(ad._previewEls).forEach(pk=>{ if(state.platforms[pk]) PAINTERS[pk](ad._previewEls[pk],ad,state.deal); });
+  });
 }
 
 /* ===================== STEP 2: chips + deal + ads ===================== */
@@ -521,6 +607,9 @@ function platFields(pk, ad){
       mkField({label:'Descriptions',rows:6,lines:{limit:90,max:4},hint:'One per line, 90 characters each',value:ad.search.descs,onInput:v=>{ad.search.descs=v;}})
     );
   }
+  const prev=document.createElement('div'); prev.className='prevwrap'; fs.appendChild(prev);
+  ad._previewEls=ad._previewEls||{}; ad._previewEls[pk]=prev;
+  PAINTERS[pk](prev,ad,state.deal);
   return fs;
 }
 
@@ -658,6 +747,17 @@ async function doCopy(pk){
 }
 
 /* ===================== STEP 1: plain-language fill ===================== */
+const modeDescribe=$('#modeDescribe'), modeManual=$('#modeManual'), aiPanel=$('#aiPanel'), manualNote=$('#manualNote');
+function setMode(m){
+  modeDescribe.setAttribute('aria-pressed', m==='describe' ? 'true':'false');
+  modeManual.setAttribute('aria-pressed', m==='manual' ? 'true':'false');
+  aiPanel.hidden = m!=='describe';
+  manualNote.hidden = m!=='manual';
+}
+modeDescribe.addEventListener('click',()=>setMode('describe'));
+modeManual.addEventListener('click',()=>setMode('manual'));
+$('#goForm').addEventListener('click',()=>{ $('#step2').scrollIntoView({behavior:'smooth',block:'start'}); });
+
 const aiGo=$('#aiGo'), aiStop=$('#aiStop'), aiStatus=$('#aiStatus'), aiNotice=$('#aiNotice');
 let samplePromise=null, ctl=null;
 function getSample(){
@@ -675,8 +775,14 @@ function todayInfo(){
 }
 function buildPrompt(note, draft){
   const t=todayInfo();
+  const voice = [
+    'Domino\'s Pizza Malaysia\'s social voice: warm, casual and a little playful, never pushy.',
+    'A post usually opens with a short, relatable everyday hook (often a light question about the day or a craving), then states the deal plainly (what you get and the price), mentions delivery/pick-up if relevant, gives the promo code if one was given, and closes with a light, friendly nudge to order.',
+    'Sparing emoji is fine in longer copy (never in TikTok text, which must have none at all).',
+    'Every platform here is far shorter than a full social caption, so compress to just the hook plus the core offer — do not try to fit a whole caption into a 25-character Meta headline.'
+  ].join(' ');
   const copyRule = draft
-    ? 'Copy the ad text exactly where the note gives it. Where the note gives none for a platform listed in "platforms", write short copy in the voice of Domino\'s Malaysia: friendly, direct, naming the offer and the end date when known. No emojis for TikTok.'
+    ? 'Where the note gives exact wording for a field, use it. For every other copy field of every platform listed in "platforms", write it yourself in ' + voice + ' Fill every applicable copy field for each ad (do not write a headline but skip the description, for example) unless a field genuinely does not apply, such as unused Search headline/description slots. Never invent a price, code or date that is not in the note.'
     : 'Fill copy fields only with text the note actually gives. Do not write any copy yourself; leave the rest empty.';
   return [
     'You fill in a form for the paid digital ads sheet of the Domino\'s Pizza Malaysia marketing team. Read the note at the bottom and extract the deal.',
@@ -753,7 +859,7 @@ aiStop.addEventListener('click',()=>{ if(ctl) ctl.abort(); });
 function renderAll(){ renderChips(); renderDeal(); renderAds(); updateOutput(); }
 buildBlocks();
 renderAll();
-getSample().then(s=>{ if(!s){ aiGo.disabled=true; setStatus('Describing the deal in words is not available in this view. Use the form in step 2.'); } });
+getSample().then(s=>{ if(!s){ aiGo.disabled=true; setStatus('Describing the deal in words is not available in this view. Use the form in step 2.'); modeManual.click(); } });
 
 })();
 </script>
