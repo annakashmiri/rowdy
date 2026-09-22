@@ -208,7 +208,7 @@ td.over small{color:var(--red);font-weight:700}
     <p class="sub">Choose how you'd like to enter it. Either way, you check everything in step 2 before anything is copied.</p>
     <div class="modepick" role="group" aria-label="How to start">
       <button type="button" class="modebtn" id="modeDescribe" aria-pressed="true">
-        <strong>Describe it</strong><span>Write a sentence or two. Claude fills the form, including a headline and ad copy in Domino's style if you want.</span>
+        <strong>Describe it</strong><span>Write a sentence or two. Gemini fills the form, including a headline and ad copy in Domino's style if you want.</span>
       </button>
       <button type="button" class="modebtn" id="modeManual" aria-pressed="false">
         <strong>Fill it in myself</strong><span>Skip straight to the form in step 2 and type in every field by hand.</span>
@@ -220,6 +220,7 @@ td.over small{color:var(--red);font-weight:700}
       <div class="ai-actions">
         <button type="button" class="btn primary" id="aiGo">Fill in the form</button>
         <button type="button" class="btn" id="aiStop" hidden>Stop</button>
+        <button type="button" class="btn quiet small" id="aiChangeKey">Change API Key</button>
         <label class="check"><input type="checkbox" id="draft" checked> Write headline &amp; ad copy for me, in Domino's style</label>
         <label class="check" id="toneWrap">Tone
           <select id="tone">
@@ -412,7 +413,7 @@ function generate(pk, deal, ads, startRow){
            warnings:collectWarnings(pk,deal,ads,records) };
 }
 
-/* normalising what Claude returns */
+/* normalising what Gemini returns */
 function str(v){ return (typeof v==='string'||typeof v==='number') ? String(v).trim() : ''; }
 function toLines(v){ return Array.isArray(v) ? v.map(str).filter(Boolean).join('\n') : (typeof v==='string' ? v.trim() : ''); }
 function newAd(){ return {name:'',meta:{headline:'',primary:'',desc:''},tiktok:{primary:''},youtube:{headline:'',long:'',desc:'',url:''},search:{headlines:'',descs:''}}; }
@@ -511,7 +512,7 @@ function escapeHtml(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'
 function paintMeta(el,ad,deal){
   const h=clean(ad.meta.headline)||'Headline', b=clean(ad.meta.primary)||'Primary text goes here', d=clean(ad.meta.desc), cta=clean(deal.cta)||'Order Now';
   el.innerHTML='<p class="prevlabel">How this roughly looks on Meta</p><div class="prev-meta">'+
-    '<p class="sponsored">Sponsored</p><p class="body">'+escapeHtml(b)+'</p><div class="img"></div>'+
+    '<p class="sponsored">Sponsored</p><div class="body">'+escapeHtml(b)+'</div><div class="img"></div>'+
     '<div class="metafoot"><div><p class="hl">'+escapeHtml(h)+'</p>'+(d?'<p class="desc">'+escapeHtml(d)+'</p>':'')+'</div>'+
     '<span class="cta">'+escapeHtml(cta)+'</span></div></div>';
 }
@@ -767,15 +768,24 @@ modeDescribe.addEventListener('click',()=>setMode('describe'));
 modeManual.addEventListener('click',()=>setMode('manual'));
 $('#goForm').addEventListener('click',()=>{ $('#step2').scrollIntoView({behavior:'smooth',block:'start'}); });
 
-const aiGo=$('#aiGo'), aiStop=$('#aiStop'), aiStatus=$('#aiStatus'), aiNotice=$('#aiNotice');
-let samplePromise=null, ctl=null;
-function getSample(){
-  if(!samplePromise){
-    samplePromise=(async()=>{ try{ return (window.claude && window.claude.use) ? await window.claude.use('sample') : null; }catch(e){ return null; } })();
-  }
-  return samplePromise;
-}
+const aiGo=$('#aiGo'), aiStop=$('#aiStop'), aiChangeKey=$('#aiChangeKey'), aiStatus=$('#aiStatus'), aiNotice=$('#aiNotice');
+let ctl=null;
+
 function setStatus(msg,isErr){ aiStatus.textContent=msg||''; aiStatus.classList.toggle('err',!!isErr); }
+
+aiChangeKey.addEventListener('click',()=>{
+  const curr = localStorage.getItem('geminiApiKey') || '';
+  const next = prompt('Enter your Gemini API Key:', curr);
+  if(next !== null){
+    if(next.trim()){
+      localStorage.setItem('geminiApiKey', next.trim());
+      setStatus('Gemini API key updated.');
+    } else {
+      localStorage.removeItem('geminiApiKey');
+      setStatus('Gemini API key removed.');
+    }
+  }
+});
 
 function todayInfo(){
   const d=new Date();
@@ -827,55 +837,84 @@ function buildPrompt(note, draft, tone){
     '"""'
   ].join('\n');
 }
-function errorCopy(code){
-  switch(code){
-    case 'not_granted': case 'sampling_disabled': case 'not_declared': case 'capability_disabled': case 'capability_removed':
-      return 'Filling from a description is not available here. Use the form in step 2 instead.';
-    case 'rate_limited': return 'That hit a usage limit. Try again in a little while, or fill the form by hand.';
-    case 'session_expired': return 'You need to sign in to Claude again, then try once more.';
-    case 'prompt_too_large': return 'That note is too long. Trim it down and try again.';
-    default: return 'Could not read that one. Try again, or fill the form by hand.';
-  }
-}
+
 $('#draft').addEventListener('change',()=>{ $('#toneWrap').hidden=!$('#draft').checked; });
-aiGo.addEventListener('click',async()=>{
-  const note=$('#brief').value.trim();
-  if(!note){ setStatus('Write a few lines about the deal first.',true); return; }
-  setStatus('Checking that this is available…');
-  const sample=await getSample();
-  if(!sample){ setStatus(errorCopy('not_declared'),true); return; }
-  const draft=$('#draft').checked, tone=$('#tone').value;
-  ctl=new AbortController();
-  aiGo.disabled=true; aiStop.hidden=false; aiNotice.hidden=true;
-  setStatus('Reading your description. This can take up to a minute.');
-  try{
-    const data=await sample.json(buildPrompt(note,draft,tone),{signal:ctl.signal,cache:false});
-    const unclear=applyParsed(state,data);
+
+aiGo.addEventListener('click', async () => {
+  const note = $('#brief').value.trim();
+  if (!note) { setStatus('Write a few lines about the deal first.', true); return; }
+
+  let apiKey = localStorage.getItem('geminiApiKey');
+  if (!apiKey) {
+    apiKey = prompt('Please enter your Gemini API key:');
+    if (!apiKey) { setStatus('An API key is required to use the AI feature.', true); return; }
+    apiKey = apiKey.trim();
+    localStorage.setItem('geminiApiKey', apiKey);
+  }
+
+  const draft = $('#draft').checked, tone = $('#tone').value;
+  ctl = new AbortController();
+  aiGo.disabled = true; aiStop.hidden = false; aiNotice.hidden = true;
+  setStatus('Reading your description with Gemini. This can take a few seconds…');
+
+  try {
+    const promptText = buildPrompt(note, draft, tone);
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: ctl.signal,
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: { responseMimeType: 'application/json' }
+      })
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      throw new Error(`API error ${response.status}: ${errBody}`);
+    }
+
+    const result = await response.json();
+    const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) throw new Error('Empty response returned by Gemini.');
+
+    const data = JSON.parse(rawText);
+    const unclear = applyParsed(state, data);
     renderAll();
     setStatus('Done. Check everything in step 2 before you copy.');
-    const items=[];
-    if(draft) items.push('Any ad copy Claude wrote is in the form for you to check. Nothing goes to the sheet until you copy it.');
-    unclear.forEach(u=>items.push(u));
-    if(items.length){
-      aiNotice.innerHTML=''; const p=document.createElement('p'); p.textContent='Worth a second look'; const ul=document.createElement('ul');
-      items.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
-      aiNotice.append(p,ul); aiNotice.hidden=false;
+
+    const items = [];
+    if (draft) items.push('Any ad copy Gemini wrote is in the form for you to check. Nothing goes to the sheet until you copy it.');
+    unclear.forEach(u => items.push(u));
+    if (items.length) {
+      aiNotice.innerHTML = '';
+      const p = document.createElement('p'); p.textContent = 'Worth a second look';
+      const ul = document.createElement('ul');
+      items.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+      aiNotice.append(p, ul); aiNotice.hidden = false;
     }
-    $('#step2').scrollIntoView({behavior:'smooth',block:'start'});
-  }catch(e){
-    if(e && e.code==='cancelled') setStatus('Stopped.');
-    else setStatus(errorCopy(e && e.code),true);
-  }finally{
-    aiGo.disabled=false; aiStop.hidden=true; ctl=null;
+    $('#step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      setStatus('Stopped.');
+    } else {
+      console.error(e);
+      setStatus('Could not process that request. Check your API key and network connection.', true);
+      if (String(e.message).includes('400') || String(e.message).includes('403')) {
+        localStorage.removeItem('geminiApiKey');
+      }
+    }
+  } finally {
+    aiGo.disabled = false; aiStop.hidden = true; ctl = null;
   }
 });
-aiStop.addEventListener('click',()=>{ if(ctl) ctl.abort(); });
+
+aiStop.addEventListener('click', () => { if (ctl) ctl.abort(); });
 
 /* ===================== INIT ===================== */
 function renderAll(){ renderChips(); renderDeal(); renderAds(); updateOutput(); }
 buildBlocks();
 renderAll();
-getSample().then(s=>{ if(!s){ aiGo.disabled=true; setStatus('Describing the deal in words is not available in this view. Use the form in step 2.'); modeManual.click(); } });
 
 })();
 </script>
