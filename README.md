@@ -77,7 +77,6 @@ All the sheet-specific settings sit at the top of the `CORE` block in `index.htm
 
 ## Do not commit the spreadsheet
 
-The real workbook contains internal campaign data and private links. `.gitignore` excludes `.xlsx` files. This repo names Domino's Malaysia's ordering site and an internal workflow, so keep it **private** unless you have approval to share it.
 
 ## Ideas for next steps
 
