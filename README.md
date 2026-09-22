@@ -8,6 +8,8 @@ Adding a deal to that sheet used to mean typing the same details four times, int
 
 ![Describe the deal](docs/01-describe.png)
 
+CLAUDE LINK - https://claude.ai/artifact/YEvkFWHcHsWtdpxX6izA3A
+
 ## How it works
 
 1. **Describe the deal** (optional). Type or paste it in plain words. Claude fills in the form.
