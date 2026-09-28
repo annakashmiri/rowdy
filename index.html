@@ -310,7 +310,7 @@ td.over small{color:var(--red);font-weight:700}
         </div>
         <div class="field">
           <label>Promo Code</label>
-          <input type="text" id="lCode" placeholder="e.g., 194993 (Optional)">
+          <input type="text" id="lCode" placeholder="e.g., 67676767 (Optional)">
         </div>
         <div class="field">
           <label>Site / Landing Page Link</label>
@@ -392,7 +392,7 @@ td.over small{color:var(--red);font-weight:700}
 
 /* ===================== CORE ===================== */
 const CTA_OPTIONS = ['Order Now','Learn More','Sign Up','See Menu','Contact Us','Get Promotions','Get Offer'];
-const SERVICE_OPTIONS = ['Pick Up','Delivery'];
+const SERVICE_OPTIONS = ['Pick Up','Delivery','Both'];
 const BASE_URL = 'https://order.dominos.com.my/';
 const DEFAULT_ROWS = { meta:274, tiktok:199, youtube:88, search:45 };
 const PLATFORMS = [
@@ -697,7 +697,7 @@ function renderDeal(){
 
   dealEl.append(
     mkField({label:'Campaign Name',cls:'wide',value:d.campaign,placeholder:'e.g. Boost Week - Stay At Home',onInput:v=>{d.campaign=v;}}),
-    mkField({label:'Service Method',value:d.service,options:[['','Not set'],['Pick Up','Pick Up'],['Delivery','Delivery']],onInput:v=>{d.service=v;}}),
+    mkField({label:'Service Method',value:d.service,options:[['','Not set'],['Pick Up','Pick Up'],['Delivery','Delivery'],['Both','Both']],onInput:v=>{d.service=v;}}),
     mkField({label:'Start Date/Time',type:'date',value:d.start,onInput:v=>{d.start=v;}}),
     endWrap,
     mkField({label:'CTA',value:d.cta,options:CTA_OPTIONS.map(c=>[c,c]),onInput:v=>{d.cta=v;}}),
@@ -1004,7 +1004,7 @@ function buildPrompt(note, draft, tone, mode){
     'Rules:',
     '- Use only what the note says. Never guess. Use "" (or [] or false) when something is not stated.',
     '- Dates are YYYY-MM-DD. If the year is missing, use the nearest upcoming occurrence counted from today. If the deal has no end date, set "ongoing": true and "end_date": "".',
-    '- service_method is exactly "Pick Up" or "Delivery", or "" when unclear.',
+    '- service_method is exactly "Pick Up" or "Delivery" or "Both", or "" when unclear.',
     '- cta is exactly one of: '+CTA_OPTIONS.join(', ')+', or "" when not stated.',
     '- campaign_name is the deal or campaign name as the note gives it.',
     '- landing_page and creative_folder MUST exactly match the links provided in the note.',
